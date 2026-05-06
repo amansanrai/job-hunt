@@ -6,7 +6,7 @@ on:
       mode:
         description: "Pipeline mode"
         required: true
-        default: "all"
+        default: "doctor"
         type: choice
         options:
           - all
@@ -37,10 +37,10 @@ jobs:
       DRY_RUN: "false"
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.11"
           cache: "pip"
@@ -49,10 +49,10 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run Career OS pipeline
-        run: PYTHONPATH=src python -m career_os.main --mode "${{ github.event.inputs.mode || 'all' }}"
+        run: PYTHONPATH=src python -m career_os.main --mode "${{ github.event.inputs.mode || 'doctor' }}"
 
       - name: Upload generated drafts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: generated-resume-cover-letter-drafts
           path: output/
