@@ -46,7 +46,7 @@ Recommended fields: `Resume Name`, `Role Type`, `Link`, `Last Updated`, `Notes`.
 
 Add these repository secrets:
 
-- `AIRTABLE_TOKEN`
+- `AIRTABLE_API_KEY` (recommended; `AIRTABLE_TOKEN` also works)
 - `AIRTABLE_BASE_ID`
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
@@ -62,7 +62,11 @@ Optional variables:
 - `AIRTABLE_RESUME_VERSIONS_TABLE` (default: `Resume Versions`)
 - `NVIDIA_MODEL` (default: `meta/llama-3.1-70b-instruct`)
 
-## 4. Manual run
+## 4. Activation checklist
+
+Follow [`docs/deployment.md`](deployment.md) to enable GitHub Actions, add secrets, run `doctor`, test Telegram, and activate the scheduled job scan.
+
+## 5. Manual run
 
 ```bash
 PYTHONPATH=src DRY_RUN=true python -m career_os.main --mode all

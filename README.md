@@ -25,6 +25,7 @@ Pipeline modules:
 src/career_os/                    # Python automation engine
 data/master_profile.json          # single source of truth for the candidate profile
 data/sources.json                 # free job source configuration and keywords
+data/seed_jobs.json               # optional manually verified direct apply links
 docs/setup.md                     # Airtable, Telegram, NVIDIA, and manual-run setup
 ```
 
@@ -47,7 +48,8 @@ The runtime uses only the Python standard library; no paid services or server ar
 2. Add GitHub secrets for Airtable, Telegram, and optionally NVIDIA.
 3. Update [`data/master_profile.json`](data/master_profile.json) with your real CV details.
 4. Update [`data/sources.json`](data/sources.json) if you want to add or remove career pages.
-5. Run locally in dry-run mode:
+5. Follow the deployment checklist in [`docs/deployment.md`](docs/deployment.md).
+6. Run locally in dry-run mode:
 
 ```bash
 PYTHONPATH=src DRY_RUN=true python -m career_os.main --mode all
@@ -56,6 +58,7 @@ PYTHONPATH=src DRY_RUN=true python -m career_os.main --mode all
 ## Safety rules
 
 - The workflow only prepares drafts and tracking records.
+- The job finder rejects plain homepages and generic career landing pages unless explicitly allowed; use `data/seed_jobs.json` for verified direct apply links when a site blocks scraping.
 - It does not bypass CAPTCHA, auto-submit forms, or spam job boards.
 - Resume generation must stay truthful: it reorders and emphasizes existing profile evidence, but does not invent experience.
 - Career pages are checked at low frequency to avoid aggressive scraping.

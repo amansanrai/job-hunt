@@ -27,7 +27,7 @@ class Settings:
     @classmethod
     def from_env(cls) -> "Settings":
         return cls(
-            airtable_token=os.getenv("AIRTABLE_TOKEN"),
+            airtable_token=os.getenv("AIRTABLE_API_KEY") or os.getenv("AIRTABLE_TOKEN"),
             airtable_base_id=os.getenv("AIRTABLE_BASE_ID"),
             airtable_applications_table=os.getenv("AIRTABLE_APPLICATIONS_TABLE", "Applications"),
             airtable_skills_table=os.getenv("AIRTABLE_SKILLS_TABLE", "Skills"),
@@ -53,3 +53,10 @@ def load_profile() -> dict[str, Any]:
 
 def load_sources() -> dict[str, Any]:
     return load_json(ROOT / "data" / "sources.json")
+
+
+def load_seed_jobs() -> dict[str, Any]:
+    path = ROOT / "data" / "seed_jobs.json"
+    if not path.exists():
+        return {"jobs": []}
+    return load_json(path)

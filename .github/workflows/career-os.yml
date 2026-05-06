@@ -12,9 +12,10 @@ on:
           - all
           - jobs
           - skills
+          - doctor
   schedule:
-    # Four runs per day in UTC: 02:30, 08:30, 14:30, 20:30.
-    - cron: "30 2,8,14,20 * * *"
+    # Every 6 hours in UTC.
+    - cron: "0 */6 * * *"
 
 jobs:
   run-career-os:
@@ -22,6 +23,7 @@ jobs:
     permissions:
       contents: read
     env:
+      AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
       AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
       AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
       AIRTABLE_APPLICATIONS_TABLE: ${{ vars.AIRTABLE_APPLICATIONS_TABLE || 'Applications' }}

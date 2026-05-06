@@ -5,13 +5,34 @@ import re
 from html import unescape
 from html.parser import HTMLParser
 from urllib.error import HTTPError, URLError
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 from .http import get_text
 from .models import JobLead
 from .scoring import keyword_hits, score_job
 
 LOGGER = logging.getLogger(__name__)
+
+DIRECT_APPLY_TERMS = [
+    "apply",
+    "job-detail",
+    "job_detail",
+    "jobdetails",
+    "jobs/",
+    "careers/jobs",
+    "current-openings",
+    "opening",
+    "greenhouse.io",
+    "lever.co",
+    "workdayjobs",
+    "myworkdayjobs",
+    "smartrecruiters",
+    "bamboohr",
+    "ashbyhq",
+    "recruitee",
+]
+
+GENERIC_PAGE_TERMS = ["/careers", "/career", "/jobs", "/join-us", "/work-with-us"]
 
 
 class LinkTextParser(HTMLParser):
@@ -54,12 +75,40 @@ class LinkTextParser(HTMLParser):
         return unescape(" ".join(self.text_parts))
 
 
+def _path_without_trailing_slash(url: str) -> str:
+    parsed = urlparse(url)
+    return parsed.path.rstrip("/").lower()
+
+
+def is_direct_apply_link(label: str, href: str, keywords: list[str]) -> bool:
+    """Return true only for links likely to be actionable job/apply URLs.
+
+    This intentionally rejects plain company homepages or generic careers landing pages by default,
+    because the workflow should notify Aman with links he can click and use immediately.
+    """
+    joined = f"{label} {href}".lower()
+    if not (keyword_hits(joined, keywords) or any(term in joined for term in DIRECT_APPLY_TERMS)):
+        return False
+
+    parsed = urlparse(href)
+    if not parsed.scheme.startswith("http"):
+        return False
+
+    path = _path_without_trailing_slash(href)
+    if path in {"", "/"}:
+        return False
+
+    if any(path == term for term in GENERIC_PAGE_TERMS):
+        return False
+
+    return True
+
+
 def _candidate_links(base_url: str, links: list[tuple[str, str]], keywords: list[str]) -> list[tuple[str, str]]:
     candidates: list[tuple[str, str]] = []
     for label, href in links:
         absolute_href = urljoin(base_url, href)
-        joined = f"{label} {absolute_href}"
-        if keyword_hits(joined, keywords) or any(term in absolute_href.lower() for term in ["career", "job", "apply", "opening"]):
+        if is_direct_apply_link(label or absolute_href, absolute_href, keywords):
             candidates.append((label or absolute_href, absolute_href))
     seen: set[str] = set()
     unique: list[tuple[str, str]] = []
@@ -89,18 +138,18 @@ def fetch_page_leads(source: dict, keywords: list[str], blocked_keywords: list[s
         return []
 
     leads: list[JobLead] = []
-    if keyword_hits(page_text, keywords):
+    if source.get("allow_discovery_page", False) and keyword_hits(page_text, keywords):
         score, category, missing = score_job(page_text, profile)
         leads.append(
             JobLead(
                 company=source["name"].replace(" Careers", ""),
-                role="Career page match - review current openings",
+                role="Discovery page match - find exact apply link before applying",
                 category=category,
                 location="India / see posting",
                 link=url,
                 source=source["name"],
                 snippet=page_text[:500],
-                match_score=score,
+                match_score=max(0, score - 20),
                 missing_skills=missing,
             )
         )
@@ -119,7 +168,7 @@ def fetch_page_leads(source: dict, keywords: list[str], blocked_keywords: list[s
                     location="India / see posting",
                     link=href,
                     source=source["name"],
-                    snippet=text[:500],
+                    snippet=f"Direct apply candidate: {text[:450]}",
                     match_score=score,
                     missing_skills=missing,
                 )
@@ -127,10 +176,33 @@ def fetch_page_leads(source: dict, keywords: list[str], blocked_keywords: list[s
     return leads
 
 
-def find_jobs(sources: dict, profile: dict, limit: int = 15) -> list[JobLead]:
+def seed_job_leads(seed_jobs: dict, profile: dict) -> list[JobLead]:
+    leads: list[JobLead] = []
+    for item in seed_jobs.get("jobs", []):
+        text = " ".join(str(item.get(key, "")) for key in ["company", "role", "category", "location", "link", "notes"])
+        score, inferred_category, missing = score_job(text, profile)
+        leads.append(
+            JobLead(
+                company=item.get("company", "Unknown company"),
+                role=item.get("role", "Review seeded role"),
+                category=item.get("category") or inferred_category,
+                location=item.get("location", "India / see posting"),
+                link=item.get("link", ""),
+                source="seed_jobs.json",
+                snippet=item.get("notes", "Manually seeded direct apply link"),
+                match_score=max(score, int(item.get("match_score", 0) or 0)),
+                missing_skills=missing,
+            )
+        )
+    return [lead for lead in leads if lead.link]
+
+
+def find_jobs(sources: dict, profile: dict, seed_jobs: dict | None = None, limit: int = 15) -> list[JobLead]:
     keywords = sources.get("keywords", [])
     blocked_keywords = sources.get("blocked_keywords", [])
     all_leads: list[JobLead] = []
+    if seed_jobs:
+        all_leads.extend(seed_job_leads(seed_jobs, profile))
     for source in sources.get("pages", []):
         all_leads.extend(fetch_page_leads(source, keywords, blocked_keywords, profile))
     deduped: dict[str, JobLead] = {}

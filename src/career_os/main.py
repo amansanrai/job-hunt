@@ -6,7 +6,8 @@ from pathlib import Path
 
 from .ai import generate_cover_letter
 from .airtable_client import AirtableClient
-from .config import ROOT, Settings, load_profile, load_sources
+from .config import ROOT, Settings, load_profile, load_seed_jobs, load_sources
+from .doctor import format_doctor_report
 from .job_finder import find_jobs
 from .resume import create_tailored_resume
 from .skills import choose_daily_skill
@@ -19,7 +20,8 @@ LOGGER = logging.getLogger(__name__)
 def run_jobs(settings: Settings) -> list[str]:
     profile = load_profile()
     sources = load_sources()
-    jobs = find_jobs(sources, profile)
+    seed_jobs = load_seed_jobs()
+    jobs = find_jobs(sources, profile, seed_jobs=seed_jobs)
     airtable = AirtableClient(settings)
     output_dir = ROOT / "output" / "resumes"
 
@@ -60,11 +62,13 @@ def run_skills(settings: Settings, missing_skills: list[str] | None = None) -> N
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Aman's free aerospace career automation system")
-    parser.add_argument("--mode", choices=["all", "jobs", "skills"], default="all")
+    parser.add_argument("--mode", choices=["all", "jobs", "skills", "doctor"], default="all")
     args = parser.parse_args()
     settings = Settings.from_env()
 
-    if args.mode == "jobs":
+    if args.mode == "doctor":
+        print(format_doctor_report(settings))
+    elif args.mode == "jobs":
         run_jobs(settings)
     elif args.mode == "skills":
         run_skills(settings)
