@@ -26,8 +26,16 @@ class AirtableClient:
 
     def _extract_unknown_field(self, error_msg: str) -> str | None:
         """Extract field name from Airtable UNKNOWN_FIELD_NAME error."""
-        match = re.search(r'Unknown field name: "([^"]+)"', error_msg)
-        return match.group(1) if match else None
+        # Handle both "Notes" and escaped \"Notes\" from JSON response body
+        for pattern in [
+            r'Unknown field name: \\"([^\\]+)\\"',
+            r'Unknown field name: "([^"]+)"',
+            r"UNKNOWN_FIELD_NAME.*?Unknown field name.*?(\w[\w ]+\w)",
+        ]:
+            match = re.search(pattern, error_msg)
+            if match:
+                return match.group(1).strip()
+        return None
 
     def create_record(self, table: str, fields: dict[str, object]) -> bool:
         if not self.enabled:
@@ -54,10 +62,8 @@ class AirtableClient:
                     continue
                 else:
                     LOGGER.error(
-                        "Airtable write failed for table %r. Check token base access, data.records:write scope, "
-                        "table name, and field names. Error: %s",
-                        table,
-                        exc,
+                        "Airtable write failed for table %r. Error: %s",
+                        table, exc,
                     )
                     return False
         return False
