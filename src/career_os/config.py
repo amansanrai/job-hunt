@@ -9,6 +9,11 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def clean_env(name: str) -> str | None:
+    value = os.getenv(name)
+    return value.strip() if value else None
+
+
 @dataclass(frozen=True)
 class Settings:
     airtable_token: str | None
@@ -27,17 +32,17 @@ class Settings:
     @classmethod
     def from_env(cls) -> "Settings":
         return cls(
-            airtable_token=os.getenv("AIRTABLE_API_KEY") or os.getenv("AIRTABLE_TOKEN"),
-            airtable_base_id=os.getenv("AIRTABLE_BASE_ID"),
+            airtable_token=clean_env("AIRTABLE_API_KEY") or clean_env("AIRTABLE_TOKEN"),
+            airtable_base_id=clean_env("AIRTABLE_BASE_ID"),
             airtable_applications_table=os.getenv("AIRTABLE_APPLICATIONS_TABLE", "Applications"),
             airtable_skills_table=os.getenv("AIRTABLE_SKILLS_TABLE", "Skills"),
             airtable_daily_tasks_table=os.getenv("AIRTABLE_DAILY_TASKS_TABLE", "Daily Tasks"),
             airtable_resume_versions_table=os.getenv("AIRTABLE_RESUME_VERSIONS_TABLE", "Resume Versions"),
-            telegram_bot_token=os.getenv("TELEGRAM_BOT_TOKEN"),
-            telegram_chat_id=os.getenv("TELEGRAM_CHAT_ID"),
-            nvidia_api_key=os.getenv("NVIDIA_API_KEY"),
+            telegram_bot_token=clean_env("TELEGRAM_BOT_TOKEN"),
+            telegram_chat_id=clean_env("TELEGRAM_CHAT_ID"),
+            nvidia_api_key=clean_env("NVIDIA_API_KEY"),
             nvidia_model=os.getenv("NVIDIA_MODEL", "meta/llama-3.1-70b-instruct"),
-            dropbox_token=os.getenv("DROPBOX_TOKEN"),
+            dropbox_token=clean_env("DROPBOX_TOKEN"),
             dry_run=os.getenv("DRY_RUN", "false").lower() == "true",
         )
 
