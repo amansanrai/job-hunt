@@ -22,12 +22,25 @@ class AirtableClient:
         assert self.settings.airtable_token is not None
         return {"Authorization": f"Bearer {self.settings.airtable_token}", "Content-Type": "application/json"}
 
-    def create_record(self, table: str, fields: dict[str, object]) -> None:
+    def create_record(self, table: str, fields: dict[str, object]) -> bool:
         if not self.enabled:
             LOGGER.info("DRY RUN Airtable %s: %s", table, fields)
-            return
-        post_json(self._url(table), {"fields": fields}, headers=self._headers(), timeout=30)
+            return True
+        try:
+            post_json(self._url(table), {"fields": fields, "typecast": True}, headers=self._headers(), timeout=30)
+        except RuntimeError as exc:
+            LOGGER.error(
+                "Airtable write failed for table %r. Check token base access, data.records:write scope, "
+                "table name, and field names. Error: %s",
+                table,
+                exc,
+            )
+            return False
+        return True
 
-    def create_records(self, table: str, records: list[dict[str, object]]) -> None:
+    def create_records(self, table: str, records: list[dict[str, object]]) -> int:
+        success_count = 0
         for fields in records:
-            self.create_record(table, fields)
+            if self.create_record(table, fields):
+                success_count += 1
+        return success_count

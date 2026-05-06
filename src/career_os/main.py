@@ -41,7 +41,8 @@ def run_jobs(settings: Settings) -> list[str]:
         application_records.append(fields)
         telegram_lines.append(f"{index}. {job.company} — {job.role}\nScore: {job.match_score}% | {job.category}\nApply: {job.link}\nResume: {resume_path.name}\n")
 
-    airtable.create_records(settings.airtable_applications_table, application_records)
+    airtable_count = airtable.create_records(settings.airtable_applications_table, application_records)
+    telegram_lines.append(f"Airtable rows written: {airtable_count}/{len(application_records)}")
     send_telegram(settings, "\n".join(telegram_lines))
     return missing_skills
 
@@ -49,10 +50,12 @@ def run_jobs(settings: Settings) -> list[str]:
 def run_skills(settings: Settings, missing_skills: list[str] | None = None) -> None:
     profile = load_profile()
     daily_task = choose_daily_skill(profile, missing_skills or [])
-    AirtableClient(settings).create_record(settings.airtable_daily_tasks_table, daily_task)
+    airtable_ok = AirtableClient(settings).create_record(settings.airtable_daily_tasks_table, daily_task)
+    airtable_status = "written" if airtable_ok else "failed - check Airtable token/base/table permissions"
     send_telegram(
         settings,
         "🛠️ Daily aerospace skill task\n"
+        f"Airtable status: {airtable_status}\n"
         f"Skill: {daily_task['Skill']}\n"
         f"Task: {daily_task['Task']}\n"
         f"Resource: {daily_task['Resource']}\n"

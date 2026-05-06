@@ -6,7 +6,7 @@ on:
       mode:
         description: "Pipeline mode"
         required: true
-        default: "all"
+        default: "doctor"
         type: choice
         options:
           - all
@@ -35,6 +35,7 @@ jobs:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
       NVIDIA_MODEL: ${{ vars.NVIDIA_MODEL || 'meta/llama-3.1-70b-instruct' }}
       DRY_RUN: "false"
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

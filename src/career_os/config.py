@@ -9,9 +9,12 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def clean_env(name: str) -> str | None:
-    value = os.getenv(name)
-    return value.strip() if value else None
+def clean_env(name: str, default: str | None = None) -> str | None:
+    value = os.getenv(name, default)
+    if value is None:
+        return None
+    cleaned = value.strip()
+    return cleaned or None
 
 
 @dataclass(frozen=True)
@@ -31,19 +34,20 @@ class Settings:
 
     @classmethod
     def from_env(cls) -> "Settings":
+        airtable_token = clean_env("AIRTABLE_API_KEY") or clean_env("AIRTABLE_TOKEN")
         return cls(
-            airtable_token=clean_env("AIRTABLE_API_KEY") or clean_env("AIRTABLE_TOKEN"),
+            airtable_token=airtable_token,
             airtable_base_id=clean_env("AIRTABLE_BASE_ID"),
-            airtable_applications_table=os.getenv("AIRTABLE_APPLICATIONS_TABLE", "Applications"),
-            airtable_skills_table=os.getenv("AIRTABLE_SKILLS_TABLE", "Skills"),
-            airtable_daily_tasks_table=os.getenv("AIRTABLE_DAILY_TASKS_TABLE", "Daily Tasks"),
-            airtable_resume_versions_table=os.getenv("AIRTABLE_RESUME_VERSIONS_TABLE", "Resume Versions"),
+            airtable_applications_table=clean_env("AIRTABLE_APPLICATIONS_TABLE", "Applications") or "Applications",
+            airtable_skills_table=clean_env("AIRTABLE_SKILLS_TABLE", "Skills") or "Skills",
+            airtable_daily_tasks_table=clean_env("AIRTABLE_DAILY_TASKS_TABLE", "Daily Tasks") or "Daily Tasks",
+            airtable_resume_versions_table=clean_env("AIRTABLE_RESUME_VERSIONS_TABLE", "Resume Versions") or "Resume Versions",
             telegram_bot_token=clean_env("TELEGRAM_BOT_TOKEN"),
             telegram_chat_id=clean_env("TELEGRAM_CHAT_ID"),
             nvidia_api_key=clean_env("NVIDIA_API_KEY"),
-            nvidia_model=os.getenv("NVIDIA_MODEL", "meta/llama-3.1-70b-instruct"),
+            nvidia_model=clean_env("NVIDIA_MODEL", "meta/llama-3.1-70b-instruct") or "meta/llama-3.1-70b-instruct",
             dropbox_token=clean_env("DROPBOX_TOKEN"),
-            dry_run=os.getenv("DRY_RUN", "false").lower() == "true",
+            dry_run=(clean_env("DRY_RUN", "false") or "false").lower() == "true",
         )
 
 
