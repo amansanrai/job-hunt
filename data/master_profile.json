@@ -1,0 +1,46 @@
+{
+  "name": "Aman Rai",
+  "headline": "BTech fresher targeting UAV, CFD, CAD, simulation, and aerospace supplier roles in India",
+  "location_preferences": ["India", "Bangalore", "Pune", "Chennai", "Hyderabad", "Mumbai", "Remote"],
+  "education": {
+    "degree": "BTech",
+    "graduation_status": "graduating_this_month",
+    "cgpa": 5.5
+  },
+  "target_roles": [
+    "UAV Engineer",
+    "CFD Engineer",
+    "Simulation Engineer",
+    "CAD Engineer",
+    "Aerospace Design Intern",
+    "Graduate Engineer Trainee",
+    "Aircraft Documentation Engineer"
+  ],
+  "preferred_categories": ["Rocketry", "UAV", "CFD", "Simulation", "CAD", "Aerospace Manufacturing", "Aircraft Documentation"],
+  "skills": [
+    "SolidWorks basics",
+    "MATLAB basics",
+    "ANSYS Fluent basics",
+    "CAD modelling",
+    "aerodynamics fundamentals",
+    "engineering documentation"
+  ],
+  "projects": [
+    {
+      "name": "Airfoil CFD learning project",
+      "category": "CFD",
+      "evidence": "In progress: Cl/Cd extraction, mesh independence, pressure contours"
+    },
+    {
+      "name": "UAV CAD concept project",
+      "category": "UAV/CAD",
+      "evidence": "In progress: wing/fuselage modelling and manufacturable brackets"
+    }
+  ],
+  "weak_areas": ["OpenFOAM", "ROS2", "PX4", "mesh independence", "MATLAB Simulink controls", "sheet metal design"],
+  "learning_preferences": {
+    "daily_minutes": 30,
+    "resource_cost": "free_only",
+    "style": "small output-based tasks with proof of work"
+  }
+}
