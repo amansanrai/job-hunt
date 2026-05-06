@@ -1,0 +1,18 @@
+{
+  "keywords": [
+    "aerospace", "aeronautical", "uav", "drone", "cfd", "cae", "simulation", "solidworks", "catia", "ansys", "openfoam", "matlab", "simulink", "rocket", "propulsion", "aircraft documentation", "graduate engineer trainee"
+  ],
+  "blocked_keywords": ["paid training", "course fee", "pay after placement", "senior", "principal", "8 years", "10 years"],
+  "pages": [
+    {"name": "Agnikul Careers", "url": "https://agnikul.in/careers/"},
+    {"name": "Skyroot Careers", "url": "https://skyroot.in/careers/"},
+    {"name": "ideaForge Careers", "url": "https://www.ideaforgetech.com/careers"},
+    {"name": "Airbus India Careers Search", "url": "https://www.airbus.com/en/careers/search-and-apply"},
+    {"name": "L&T Careers", "url": "https://www.larsentoubro.com/corporate/careers/"},
+    {"name": "Tata Advanced Systems Careers", "url": "https://www.tataadvancedsystems.com/careers"},
+    {"name": "NewSpace Research Careers", "url": "https://newspace.co.in/careers/"},
+    {"name": "Asteria Aerospace Careers", "url": "https://asteria.co.in/careers/"},
+    {"name": "Garuda Aerospace Careers", "url": "https://www.garudaaerospace.com/careers"},
+    {"name": "NAL Careers", "url": "https://www.nal.res.in/en/career"}
+  ]
+}

@@ -1,0 +1,59 @@
+name: Career OS
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Pipeline mode"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - jobs
+          - skills
+          - doctor
+  schedule:
+    # Every 6 hours in UTC.
+    - cron: "0 */6 * * *"
+
+jobs:
+  run-career-os:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      AIRTABLE_API_KEY: ${{ secrets.AIRTABLE_API_KEY }}
+      AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+      AIRTABLE_BASE_ID: ${{ secrets.AIRTABLE_BASE_ID }}
+      AIRTABLE_APPLICATIONS_TABLE: ${{ vars.AIRTABLE_APPLICATIONS_TABLE || 'Applications' }}
+      AIRTABLE_DAILY_TASKS_TABLE: ${{ vars.AIRTABLE_DAILY_TASKS_TABLE || 'Daily Tasks' }}
+      AIRTABLE_SKILLS_TABLE: ${{ vars.AIRTABLE_SKILLS_TABLE || 'Skills' }}
+      AIRTABLE_RESUME_VERSIONS_TABLE: ${{ vars.AIRTABLE_RESUME_VERSIONS_TABLE || 'Resume Versions' }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+      NVIDIA_MODEL: ${{ vars.NVIDIA_MODEL || 'meta/llama-3.1-70b-instruct' }}
+      DRY_RUN: "false"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Career OS pipeline
+        run: PYTHONPATH=src python -m career_os.main --mode "${{ github.event.inputs.mode || 'all' }}"
+
+      - name: Upload generated drafts
+        uses: actions/upload-artifact@v4
+        with:
+          name: generated-resume-cover-letter-drafts
+          path: output/
+          if-no-files-found: ignore
