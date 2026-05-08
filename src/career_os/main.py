@@ -66,7 +66,11 @@ def run_jobs(settings: Settings) -> list[str]:
 def run_skills(settings: Settings, missing_skills: list[str] | None = None) -> None:
     profile = load_profile()
     daily_task = choose_daily_skill(profile, missing_skills or [])
-    airtable_ok = AirtableClient(settings).create_record(settings.airtable_daily_tasks_table, daily_task)
+    airtable = AirtableClient(settings)
+    if airtable.has_record_for_date(settings.airtable_daily_tasks_table, str(daily_task["Date"])):
+        LOGGER.info("Daily task already exists for %s. Skipping duplicate write and Telegram send.", daily_task["Date"])
+        return
+    airtable_ok = airtable.create_record(settings.airtable_daily_tasks_table, daily_task)
     airtable_status = "written" if airtable_ok else "failed - check Airtable token/base/table permissions"
     message = (
         "🛠️ Daily aerospace skill task\n"
