@@ -6,7 +6,7 @@ import re
 from urllib.parse import quote
 
 from .config import Settings
-from .http import post_json
+from .http import get_json, post_json
 
 LOGGER = logging.getLogger(__name__)
 
@@ -67,6 +67,23 @@ class AirtableClient:
                     )
                     return False
         return False
+
+    def has_record_for_date(self, table: str, date_value: str, date_field: str = "Date") -> bool:
+        if not self.enabled:
+            return False
+        formula = f"{{{date_field}}}='{date_value}'"
+        try:
+            response = get_json(
+                self._url(table),
+                params={"filterByFormula": formula, "maxRecords": "1"},
+                headers=self._headers(),
+                timeout=30,
+            )
+        except RuntimeError as exc:
+            LOGGER.warning("Airtable read failed for table %r while checking date %r. Error: %s", table, date_value, exc)
+            return False
+        records = response.get("records", [])
+        return isinstance(records, list) and len(records) > 0
 
     def create_records(self, table: str, records: list[dict[str, object]]) -> int:
         success_count = 0

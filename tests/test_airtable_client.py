@@ -44,3 +44,30 @@ def test_airtable_writes_with_typecast(monkeypatch):
     assert client.create_record("Applications", {"Status": "Pending"}) is True
     assert captured["payload"] == {"fields": {"Status": "Pending"}, "typecast": True}
     assert captured["headers"]["Authorization"] == "Bearer pat_test"
+
+
+def test_has_record_for_date_true_when_found(monkeypatch):
+    captured = {}
+
+    def fake_get_json(url, params, headers, timeout):
+        captured["url"] = url
+        captured["params"] = params
+        captured["headers"] = headers
+        captured["timeout"] = timeout
+        return {"records": [{"id": "rec123"}]}
+
+    monkeypatch.setattr("career_os.airtable_client.get_json", fake_get_json)
+    client = AirtableClient(_settings())
+
+    assert client.has_record_for_date("Daily Tasks", "2026-05-08") is True
+    assert captured["params"]["maxRecords"] == "1"
+    assert "2026-05-08" in captured["params"]["filterByFormula"]
+
+
+def test_has_record_for_date_false_on_read_error(monkeypatch):
+    def fail_get_json(*args, **kwargs):
+        raise RuntimeError("HTTP 403 Forbidden")
+
+    monkeypatch.setattr("career_os.airtable_client.get_json", fail_get_json)
+    client = AirtableClient(_settings())
+    assert client.has_record_for_date("Daily Tasks", "2026-05-08") is False
