@@ -22,7 +22,7 @@ def run_jobs(settings: Settings) -> list[str]:
     profile = load_profile()
     sources = load_sources()
     seed_jobs = load_seed_jobs()
-    jobs = find_jobs(sources, profile, seed_jobs=seed_jobs)
+    jobs = find_jobs(sources, profile, settings=settings, seed_jobs=seed_jobs)
     airtable = AirtableClient(settings)
     output_dir = ROOT / "output" / "resumes"
 

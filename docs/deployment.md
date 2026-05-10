@@ -32,6 +32,8 @@ Optional secret:
 | Secret | Purpose |
 | --- | --- |
 | `NVIDIA_API_KEY` | Enables NVIDIA NIM cover-letter generation. Without this, the safe local fallback is used. |
+| `ADZUNA_APP_ID` | Enables Adzuna API job sourcing. |
+| `ADZUNA_APP_KEY` | Enables Adzuna API job sourcing. |
 
 ## 3. Get Telegram credentials
 
@@ -67,7 +69,7 @@ Limit access to your `Job System` base.
 In GitHub:
 
 ```text
-Actions → Career OS → Run workflow → mode: doctor
+Actions → Career OS → Run workflow → mode: doctor, dry_run: true
 ```
 
 The `doctor` mode prints which secrets are configured and whether NVIDIA is active.
@@ -75,7 +77,7 @@ The `doctor` mode prints which secrets are configured and whether NVIDIA is acti
 ## 6. Run the skill engine
 
 ```text
-Actions → Career OS → Run workflow → mode: skills
+Actions → Career OS → Run workflow → mode: skills, dry_run: false
 ```
 
 Expected result:
@@ -86,7 +88,7 @@ Expected result:
 ## 7. Run the job engine
 
 ```text
-Actions → Career OS → Run workflow → mode: jobs
+Actions → Career OS → Run workflow → mode: jobs, dry_run: false
 ```
 
 Expected result:
@@ -97,9 +99,9 @@ Expected result:
 
 ## 8. If job extraction is empty
 
-This is common during the first week because some career sites block automated requests or hide jobs behind JavaScript.
+This is common during the first week if API credentials are missing or chosen ATS boards do not publish matching entry-level roles.
 
-Do this instead of accepting random company homepages:
+Do this:
 
 1. Find a real job/application URL manually.
 2. Add it to `data/seed_jobs.json`.

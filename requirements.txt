@@ -1,1 +1,1 @@
-# Runtime uses Python standard library only.
+requests==2.32.3
