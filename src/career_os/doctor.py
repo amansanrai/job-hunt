@@ -28,6 +28,10 @@ def check_settings(settings: Settings) -> list[str]:
         messages.append("OK: DROPBOX_TOKEN is configured for resume/cover letter uploads")
     else:
         messages.append("OPTIONAL: DROPBOX_TOKEN is not set; resumes will be stored as GitHub Action artifacts only")
+    if settings.adzuna_app_id and settings.adzuna_app_key:
+        messages.append("OK: ADZUNA_APP_ID and ADZUNA_APP_KEY are configured for API job sourcing")
+    else:
+        messages.append("OPTIONAL: ADZUNA_APP_ID/ADZUNA_APP_KEY are not set; Adzuna source will be skipped")
     if settings.dry_run:
         messages.append("OK: DRY_RUN=true, no Airtable or Telegram writes will be sent")
     return messages

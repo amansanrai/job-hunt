@@ -30,6 +30,8 @@ class Settings:
     nvidia_api_key: str | None
     nvidia_model: str
     dropbox_token: str | None
+    adzuna_app_id: str | None
+    adzuna_app_key: str | None
     dry_run: bool
 
     @classmethod
@@ -47,6 +49,8 @@ class Settings:
             nvidia_api_key=clean_env("NVIDIA_API_KEY"),
             nvidia_model=clean_env("NVIDIA_MODEL", "meta/llama-3.1-70b-instruct") or "meta/llama-3.1-70b-instruct",
             dropbox_token=clean_env("DROPBOX_TOKEN"),
+            adzuna_app_id=clean_env("ADZUNA_APP_ID"),
+            adzuna_app_key=clean_env("ADZUNA_APP_KEY"),
             dry_run=(clean_env("DRY_RUN", "false") or "false").lower() == "true",
         )
 

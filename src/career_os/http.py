@@ -1,49 +1,66 @@
 from __future__ import annotations
 
 import json
-from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode
-from urllib.request import Request, urlopen
+from requests import Session
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 
-def _read_error_body(exc: HTTPError) -> str:
-    try:
-        return exc.read().decode("utf-8", errors="replace")[:1000]
-    except Exception:
-        return ""
+def _session() -> Session:
+    session = Session()
+    retry = Retry(
+        total=3,
+        connect=3,
+        read=3,
+        backoff_factor=0.5,
+        status_forcelist=(429, 500, 502, 503, 504),
+        allowed_methods=frozenset({"GET", "POST"}),
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
+
+
+HTTP = _session()
+
+
+def _read_response_body(response_text: str) -> str:
+    return response_text[:1000] if response_text else ""
 
 
 def get_text(url: str, headers: dict[str, str] | None = None, timeout: int = 20) -> str:
-    request = Request(url, headers=headers or {})
-    with urlopen(request, timeout=timeout) as response:
-        return response.read().decode("utf-8", errors="replace")
+    try:
+        response = HTTP.get(url, headers=headers or {}, timeout=timeout)
+    except Exception as exc:
+        raise RuntimeError(f"Request failed for {url}: {exc}") from exc
+    if response.status_code >= 400:
+        details = _read_response_body(response.text)
+        suffix = f" Response body: {details}" if details else ""
+        raise RuntimeError(f"HTTP {response.status_code} for {url}.{suffix}")
+    return response.text
 
 
 def get_json(url: str, params: dict[str, str] | None = None, headers: dict[str, str] | None = None, timeout: int = 30) -> dict:
-    query_url = f"{url}?{urlencode(params)}" if params else url
-    request = Request(query_url, headers=headers or {}, method="GET")
     try:
-        with urlopen(request, timeout=timeout) as response:
-            text = response.read().decode("utf-8", errors="replace")
-            return json.loads(text) if text else {}
-    except HTTPError as exc:
-        details = _read_error_body(exc)
+        response = HTTP.get(url, params=params or None, headers=headers or {}, timeout=timeout)
+    except Exception as exc:
+        raise RuntimeError(f"Request failed for {url}: {exc}") from exc
+    if response.status_code >= 400:
+        details = _read_response_body(response.text)
         suffix = f" Response body: {details}" if details else ""
-        raise RuntimeError(f"HTTP {exc.code} {exc.reason} for {query_url}.{suffix}") from exc
-    except (URLError, TimeoutError, OSError) as exc:
-        raise RuntimeError(f"Request failed for {query_url}: {exc}") from exc
+        raise RuntimeError(f"HTTP {response.status_code} for {response.url}.{suffix}")
+    return json.loads(response.text) if response.text else {}
 
 
 def post_json(url: str, payload: dict, headers: dict[str, str] | None = None, timeout: int = 30) -> dict:
-    body = json.dumps(payload).encode("utf-8")
-    request = Request(url, data=body, headers=headers or {}, method="POST")
     try:
-        with urlopen(request, timeout=timeout) as response:
-            text = response.read().decode("utf-8", errors="replace")
-            return json.loads(text) if text else {}
-    except HTTPError as exc:
-        details = _read_error_body(exc)
-        suffix = f" Response body: {details}" if details else ""
-        raise RuntimeError(f"HTTP {exc.code} {exc.reason} for {url}.{suffix}") from exc
-    except (URLError, TimeoutError, OSError) as exc:
+        response = HTTP.post(url, json=payload, headers=headers or {}, timeout=timeout)
+    except Exception as exc:
         raise RuntimeError(f"Request failed for {url}: {exc}") from exc
+    if response.status_code >= 400:
+        details = _read_response_body(response.text)
+        suffix = f" Response body: {details}" if details else ""
+        raise RuntimeError(f"HTTP {response.status_code} for {url}.{suffix}")
+    return json.loads(response.text) if response.text else {}

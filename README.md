@@ -10,7 +10,7 @@ The workflow in `.github/workflows/career-os.yml` runs four times per day and ca
 
 Pipeline modules:
 
-1. **Job Finder** — checks configured aerospace, drone, defense, and supplier career pages.
+1. **Job Finder** — fetches jobs from structured sources (Adzuna API + ATS job board APIs like Greenhouse/Lever/Ashby).
 2. **Match Scoring** — scores roles for UAV, CFD, CAD, simulation, rocketry, aerospace manufacturing, and documentation fit.
 3. **Resume Drafting** — creates DOCX drafts from the truthful master profile and the role category.
 4. **Cover Letter Drafting** — uses NVIDIA NIM when `NVIDIA_API_KEY` is set; otherwise it uses a safe local template.
@@ -24,7 +24,7 @@ Pipeline modules:
 .github/workflows/career-os.yml   # scheduled GitHub Actions runner
 src/career_os/                    # Python automation engine
 data/master_profile.json          # single source of truth for the candidate profile
-data/sources.json                 # free job source configuration and keywords
+data/sources.json                 # API job source configuration and keywords
 data/seed_jobs.json               # optional manually verified direct apply links
 docs/setup.md                     # Airtable, Telegram, NVIDIA, and manual-run setup
 ```
@@ -42,12 +42,12 @@ docs/setup.md                     # Airtable, Telegram, NVIDIA, and manual-run s
 
 ## Quick start
 
-The runtime uses only the Python standard library; no paid services or server are required.
+The runtime is lightweight (Python + requests); no paid services or server are required.
 
 1. Create the Airtable schema in [`docs/setup.md`](docs/setup.md).
 2. Add GitHub secrets for Airtable, Telegram, and optionally NVIDIA.
 3. Update [`data/master_profile.json`](data/master_profile.json) with your real CV details.
-4. Update [`data/sources.json`](data/sources.json) if you want to add or remove career pages.
+4. Update [`data/sources.json`](data/sources.json) if you want to add or remove API sources.
 5. Follow the deployment checklist in [`docs/deployment.md`](docs/deployment.md).
 6. Run locally in dry-run mode:
 
@@ -66,7 +66,7 @@ PYTHONPATH=src DRY_RUN=true python -m career_os.main --mode all
 ## Safety rules
 
 - The workflow only prepares drafts and tracking records.
-- The job finder rejects plain homepages and generic career landing pages unless explicitly allowed; use `data/seed_jobs.json` for verified direct apply links when a site blocks scraping.
+- The job finder prefers structured API sources and only keeps actionable HTTP(S) apply URLs.
 - It does not bypass CAPTCHA, auto-submit forms, or spam job boards.
 - Resume generation must stay truthful: it reorders and emphasizes existing profile evidence, but does not invent experience.
-- Career pages are checked at low frequency to avoid aggressive scraping.
+- Use `data/seed_jobs.json` for manually verified links when a source is temporarily unavailable.
