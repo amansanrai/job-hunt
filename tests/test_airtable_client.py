@@ -15,6 +15,8 @@ def _settings() -> Settings:
         nvidia_api_key=None,
         nvidia_model="model",
         dropbox_token=None,
+        adzuna_app_id=None,
+        adzuna_app_key=None,
         dry_run=False,
     )
 
