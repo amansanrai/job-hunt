@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from urllib.parse import urlparse
 
 from .adzuna import fetch_adzuna_leads
@@ -74,7 +75,11 @@ def seed_job_leads(seed_jobs: dict, profile: dict) -> list[JobLead]:
 
 
 def _lead_hash(lead: JobLead) -> str:
-    digest_input = f"{lead.company.strip().lower()}|{lead.role.strip().lower()}|{lead.link.strip().lower()}"
+    digest_input = json.dumps(
+        [lead.company.strip().lower(), lead.role.strip().lower(), lead.link.strip().lower()],
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
     return hashlib.sha256(digest_input.encode("utf-8")).hexdigest()
 
 

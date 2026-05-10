@@ -49,7 +49,7 @@ def test_find_jobs_keeps_highest_score_for_same_company_role_link():
         "skills": ["CFD", "CAD"],
         "weak_areas": [],
     }
-    sources = {"keywords": KEYWORDS, "blocked_keywords": [], "apis": {"greenhouse": [], "lever": [], "ashby": []}}
+    sources = {"keywords": KEYWORDS, "blocked_keywords": [], "apis": {"adzuna": {}, "greenhouse": [], "lever": [], "ashby": []}}
     seed_jobs = {
         "jobs": [
             {

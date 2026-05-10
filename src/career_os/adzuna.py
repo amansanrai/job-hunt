@@ -10,6 +10,11 @@ from .scoring import keyword_hits, score_job
 LOGGER = logging.getLogger(__name__)
 
 ADZUNA_URL_TEMPLATE = "https://api.adzuna.com/v1/api/jobs/{country}/search/{page}"
+DEFAULT_ADZUNA_WHAT_OR = "aerospace drone uav cfd cad simulation fresher intern graduate engineer"
+MAX_ADZUNA_PAGES = 3
+MIN_RESULTS_PER_PAGE = 1
+DEFAULT_RESULTS_PER_PAGE = 20
+MAX_RESULTS_PER_PAGE = 50
 
 
 def _as_text(value: object) -> str:
@@ -34,14 +39,17 @@ def fetch_adzuna_leads(
         return []
 
     country = _as_text(source.get("country", "in")).lower() or "in"
-    pages = max(1, min(int(source.get("pages", 1) or 1), 3))
-    results_per_page = max(1, min(int(source.get("results_per_page", 20) or 20), 50))
+    pages = max(1, min(int(source.get("pages", 1) or 1), MAX_ADZUNA_PAGES))
+    results_per_page = max(
+        MIN_RESULTS_PER_PAGE,
+        min(int(source.get("results_per_page", DEFAULT_RESULTS_PER_PAGE) or DEFAULT_RESULTS_PER_PAGE), MAX_RESULTS_PER_PAGE),
+    )
 
     params = {
         "app_id": settings.adzuna_app_id,
         "app_key": settings.adzuna_app_key,
         "results_per_page": str(results_per_page),
-        "what_or": _as_text(source.get("what_or", "aerospace drone uav cfd cad simulation")),
+        "what_or": _as_text(source.get("what_or", DEFAULT_ADZUNA_WHAT_OR)),
         "where": _as_text(source.get("where", "India")),
         "sort_by": _as_text(source.get("sort_by", "date")) or "date",
         "content-type": "application/json",
