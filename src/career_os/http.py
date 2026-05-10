@@ -26,7 +26,7 @@ def _session() -> Session:
 HTTP = _session()
 
 
-def _read_response_body(response_text: str) -> str:
+def _truncate_response_body(response_text: str) -> str:
     return response_text[:1000] if response_text else ""
 
 
@@ -36,7 +36,7 @@ def get_text(url: str, headers: dict[str, str] | None = None, timeout: int = 20)
     except Exception as exc:
         raise RuntimeError(f"Request failed for {url}: {exc}") from exc
     if response.status_code >= 400:
-        details = _read_response_body(response.text)
+        details = _truncate_response_body(response.text)
         suffix = f" Response body: {details}" if details else ""
         raise RuntimeError(f"HTTP {response.status_code} for {url}.{suffix}")
     return response.text
@@ -48,7 +48,7 @@ def get_json(url: str, params: dict[str, str] | None = None, headers: dict[str, 
     except Exception as exc:
         raise RuntimeError(f"Request failed for {url}: {exc}") from exc
     if response.status_code >= 400:
-        details = _read_response_body(response.text)
+        details = _truncate_response_body(response.text)
         suffix = f" Response body: {details}" if details else ""
         raise RuntimeError(f"HTTP {response.status_code} for {response.url}.{suffix}")
     return json.loads(response.text) if response.text else {}
@@ -60,7 +60,7 @@ def post_json(url: str, payload: dict, headers: dict[str, str] | None = None, ti
     except Exception as exc:
         raise RuntimeError(f"Request failed for {url}: {exc}") from exc
     if response.status_code >= 400:
-        details = _read_response_body(response.text)
+        details = _truncate_response_body(response.text)
         suffix = f" Response body: {details}" if details else ""
         raise RuntimeError(f"HTTP {response.status_code} for {url}.{suffix}")
     return json.loads(response.text) if response.text else {}

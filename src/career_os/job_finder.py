@@ -37,6 +37,7 @@ def _path_without_trailing_slash(url: str) -> str:
 
 
 def is_direct_apply_link(label: str, href: str, keywords: list[str]) -> bool:
+    """Return true when a link looks like an actionable job/apply URL."""
     joined = f"{label} {href}".lower()
     if not (keyword_hits(joined, keywords) or any(term in joined for term in DIRECT_APPLY_TERMS)):
         return False
