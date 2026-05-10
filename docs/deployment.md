@@ -67,7 +67,7 @@ Limit access to your `Job System` base.
 In GitHub:
 
 ```text
-Actions → Career OS → Run workflow → mode: doctor
+Actions → Career OS → Run workflow → mode: doctor, dry_run: true
 ```
 
 The `doctor` mode prints which secrets are configured and whether NVIDIA is active.
@@ -75,7 +75,7 @@ The `doctor` mode prints which secrets are configured and whether NVIDIA is acti
 ## 6. Run the skill engine
 
 ```text
-Actions → Career OS → Run workflow → mode: skills
+Actions → Career OS → Run workflow → mode: skills, dry_run: false
 ```
 
 Expected result:
@@ -86,7 +86,7 @@ Expected result:
 ## 7. Run the job engine
 
 ```text
-Actions → Career OS → Run workflow → mode: jobs
+Actions → Career OS → Run workflow → mode: jobs, dry_run: false
 ```
 
 Expected result:

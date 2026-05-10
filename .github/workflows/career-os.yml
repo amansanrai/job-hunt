@@ -13,6 +13,14 @@ on:
           - jobs
           - skills
           - doctor
+      dry_run:
+        description: "Log Airtable/Telegram writes only (no external writes)"
+        required: true
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
   schedule:
     # Every 6 hours in UTC.
     - cron: "0 */6 * * *"
@@ -35,7 +43,7 @@ jobs:
       NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
       NVIDIA_MODEL: ${{ vars.NVIDIA_MODEL || 'meta/llama-3.1-70b-instruct' }}
       DROPBOX_TOKEN: ${{ secrets.DROPBOX_TOKEN }}
-      DRY_RUN: "false"
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.dry_run || 'false' }}
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     steps:
       - name: Checkout repository

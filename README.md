@@ -55,6 +55,14 @@ The runtime uses only the Python standard library; no paid services or server ar
 PYTHONPATH=src DRY_RUN=true python -m career_os.main --mode all
 ```
 
+### Safe try-first branch workflow
+
+1. Create a branch for the experiment.
+2. Make one focused change.
+3. Run local dry-run and tests.
+4. Run GitHub Actions manually with `dry_run: true`.
+5. Review logs/artifacts, then merge only after results are stable.
+
 ## Safety rules
 
 - The workflow only prepares drafts and tracking records.
