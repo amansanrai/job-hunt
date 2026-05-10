@@ -8,6 +8,7 @@ from .ai import generate_cover_letter
 from .airtable_client import AirtableClient
 from .config import ROOT, Settings, load_profile, load_seed_jobs, load_sources
 from .doctor import format_doctor_report
+from .dropbox_client import upload_to_dropbox
 from .job_finder import find_jobs
 from .resume import create_tailored_resume
 from .skills import choose_daily_skill
@@ -21,7 +22,7 @@ def run_jobs(settings: Settings) -> list[str]:
     profile = load_profile()
     sources = load_sources()
     seed_jobs = load_seed_jobs()
-    jobs = find_jobs(sources, profile, seed_jobs=seed_jobs)
+    jobs = find_jobs(sources, profile, settings=settings, seed_jobs=seed_jobs)
     airtable = AirtableClient(settings)
     output_dir = ROOT / "output" / "resumes"
 
@@ -36,28 +37,53 @@ def run_jobs(settings: Settings) -> list[str]:
         cover_path.write_text(cover_letter, encoding="utf-8")
         missing_skills.extend(job.missing_skills)
 
-        fields = job.airtable_fields(resume_used=str(resume_path.relative_to(ROOT)))
-        fields["Cover Letter"] = str(cover_path.relative_to(ROOT))
-        application_records.append(fields)
-        telegram_lines.append(f"{index}. {job.company} — {job.role}\nScore: {job.match_score}% | {job.category}\nApply: {job.link}\nResume: {resume_path.name}\n")
+        # Upload to Dropbox if configured, otherwise use local path
+        resume_link = upload_to_dropbox(settings, resume_path) or str(resume_path.relative_to(ROOT))
+        cover_link = upload_to_dropbox(settings, cover_path) or str(cover_path.relative_to(ROOT))
 
-    airtable.create_records(settings.airtable_applications_table, application_records)
-    send_telegram(settings, "\n".join(telegram_lines))
+        fields = job.airtable_fields(resume_used=resume_link)
+        fields["Cover Letter"] = cover_link
+        application_records.append(fields)
+        telegram_lines.append(
+            f"{index}. {job.company} — {job.role}\n"
+            f"Score: {job.match_score}% | {job.category}\n"
+            f"Apply: {job.link}\n"
+            f"Resume: {resume_link}\n"
+        )
+
+    airtable_count = airtable.create_records(settings.airtable_applications_table, application_records)
+    telegram_lines.append(f"Airtable rows written: {airtable_count}/{len(application_records)}")
+
+    message = "\n".join(telegram_lines)
+    if message.strip():
+        send_telegram(settings, message)
+    else:
+        LOGGER.warning("Telegram message was empty, skipping send.")
+
     return missing_skills
 
 
 def run_skills(settings: Settings, missing_skills: list[str] | None = None) -> None:
     profile = load_profile()
     daily_task = choose_daily_skill(profile, missing_skills or [])
-    AirtableClient(settings).create_record(settings.airtable_daily_tasks_table, daily_task)
-    send_telegram(
-        settings,
+    airtable = AirtableClient(settings)
+    if airtable.has_record_for_date(settings.airtable_daily_tasks_table, str(daily_task["Date"])):
+        LOGGER.info("Daily task already exists for %s. Skipping duplicate write and Telegram send.", daily_task["Date"])
+        return
+    airtable_ok = airtable.create_record(settings.airtable_daily_tasks_table, daily_task)
+    airtable_status = "written" if airtable_ok else "failed - check Airtable token/base/table permissions"
+    message = (
         "🛠️ Daily aerospace skill task\n"
+        f"Airtable status: {airtable_status}\n"
         f"Skill: {daily_task['Skill']}\n"
         f"Task: {daily_task['Task']}\n"
         f"Resource: {daily_task['Resource']}\n"
-        "Output rule: produce one small proof-of-work artifact before marking complete.",
+        "Output rule: produce one small proof-of-work artifact before marking complete."
     )
+    if message.strip():
+        send_telegram(settings, message)
+    else:
+        LOGGER.warning("Skill telegram message was empty, skipping send.")
 
 
 def main() -> None:

@@ -51,6 +51,8 @@ Add these repository secrets:
 - `TELEGRAM_BOT_TOKEN`
 - `TELEGRAM_CHAT_ID`
 - `NVIDIA_API_KEY` (optional; fallback templates work without it)
+- `ADZUNA_APP_ID` (optional; required if Adzuna source is enabled)
+- `ADZUNA_APP_KEY` (optional; required if Adzuna source is enabled)
 
 ## 3. GitHub variables
 

@@ -1,9 +1,9 @@
 {
   "name": "Aman Rai",
-  "headline": "BTech fresher targeting UAV, CFD, CAD, simulation, and aerospace supplier roles in India",
+  "headline": "Final-year Aerospace Engineering student with experience in CFD, MATLAB simulation, UAV design, and basic FEA",
   "location_preferences": ["India", "Bangalore", "Pune", "Chennai", "Hyderabad", "Mumbai", "Remote"],
   "education": {
-    "degree": "BTech",
+    "degree": "BTech Aerospace Engineering",
     "graduation_status": "graduating_this_month",
     "cgpa": 5.5
   },
@@ -18,23 +18,47 @@
   ],
   "preferred_categories": ["Rocketry", "UAV", "CFD", "Simulation", "CAD", "Aerospace Manufacturing", "Aircraft Documentation"],
   "skills": [
-    "SolidWorks basics",
-    "MATLAB basics",
-    "ANSYS Fluent basics",
-    "CAD modelling",
-    "aerodynamics fundamentals",
+    "CFD",
+    "ANSYS Fluent",
+    "MATLAB",
+    "Simulink",
+    "UAV design",
+    "basic FEA",
+    "Python",
+    "SolidWorks",
+    "OpenFOAM",
     "engineering documentation"
   ],
   "projects": [
     {
-      "name": "Airfoil CFD learning project",
+      "name": "Aerodynamic Analysis of NACA0010 Airfoil using CFD and Wind Tunnel",
       "category": "CFD",
-      "evidence": "In progress: Cl/Cd extraction, mesh independence, pressure contours"
+      "evidence": "Performed CFD using ANSYS Fluent, compared turbulence models, validated using wind tunnel testing."
     },
     {
-      "name": "UAV CAD concept project",
-      "category": "UAV/CAD",
-      "evidence": "In progress: wing/fuselage modelling and manufacturable brackets"
+      "name": "Quadcopter Simulation using MATLAB / Simulink",
+      "category": "Simulation",
+      "evidence": "Built dynamic model of quadcopter, analyzed thrust, stability, and control response."
+    },
+    {
+      "name": "CFD Flow Over Cylinder - ANSYS Fluent",
+      "category": "CFD",
+      "evidence": "Simulated external flow, generated mesh, analyzed vortex shedding and velocity contours."
+    },
+    {
+      "name": "Structural Analysis using ANSYS",
+      "category": "FEA",
+      "evidence": "Performed FEA on cantilever beam, calculated deformation and stress."
+    },
+    {
+      "name": "Rocket Optimization using Python",
+      "category": "Rocketry",
+      "evidence": "Used previous data to predict efficiency changes based on weight and parameters."
+    },
+    {
+      "name": "Helipad Location Planning using Python",
+      "category": "Aviation",
+      "evidence": "Selected helipad location using wind direction, approach path, and safety constraints."
     }
   ],
   "weak_areas": ["OpenFOAM", "ROS2", "PX4", "mesh independence", "MATLAB Simulink controls", "sheet metal design"],
