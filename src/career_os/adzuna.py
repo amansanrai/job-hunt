@@ -9,6 +9,7 @@ from .scoring import keyword_hits, score_job
 
 LOGGER = logging.getLogger(__name__)
 
+# Adzuna's documented endpoint shape is /v1/api/jobs/{country}/search/{page}.
 ADZUNA_URL_TEMPLATE = "https://api.adzuna.com/v1/api/jobs/{country}/search/{page}"
 DEFAULT_ADZUNA_WHAT_OR = "aerospace drone uav cfd cad simulation fresher intern graduate engineer"
 MAX_ADZUNA_PAGES = 3

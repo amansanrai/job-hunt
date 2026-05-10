@@ -5,7 +5,7 @@ from requests import Response, Session
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-MAX_ERROR_BODY_LENGTH = 1000
+MAX_RESPONSE_ERROR_LENGTH = 1000
 
 
 def _session() -> Session:
@@ -29,7 +29,7 @@ HTTP = _session()
 
 
 def _truncate_response_body(response_text: str) -> str:
-    return response_text[:MAX_ERROR_BODY_LENGTH] if response_text else ""
+    return response_text[:MAX_RESPONSE_ERROR_LENGTH] if response_text else ""
 
 
 def _request(method: str, url: str, **kwargs) -> Response:
