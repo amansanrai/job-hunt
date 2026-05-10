@@ -75,8 +75,11 @@ def seed_job_leads(seed_jobs: dict, profile: dict) -> list[JobLead]:
 
 
 def _lead_hash(lead: JobLead) -> str:
+    def _norm(value: str | None) -> str:
+        return (value or "").strip().lower()
+
     digest_input = json.dumps(
-        [lead.company.strip().lower(), lead.role.strip().lower(), lead.link.strip().lower()],
+        [_norm(lead.company), _norm(lead.role), _norm(lead.link)],
         ensure_ascii=False,
         separators=(",", ":"),
     )

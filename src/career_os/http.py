@@ -25,23 +25,22 @@ def _session() -> Session:
     return session
 
 
+HTTP = _session()
+
+
 def _truncate_response_body(response_text: str) -> str:
     return response_text[:MAX_ERROR_BODY_LENGTH] if response_text else ""
 
 
 def _request(method: str, url: str, **kwargs) -> Response:
-    session = _session()
     try:
-        return session.request(method=method, url=url, **kwargs)
-    finally:
-        session.close()
+        return HTTP.request(method=method, url=url, **kwargs)
+    except Exception as exc:
+        raise RuntimeError(f"Request failed for {url}: {exc}") from exc
 
 
 def get_text(url: str, headers: dict[str, str] | None = None, timeout: int = 20) -> str:
-    try:
-        response = _request("GET", url, headers=headers or {}, timeout=timeout)
-    except Exception as exc:
-        raise RuntimeError(f"Request failed for {url}: {exc}") from exc
+    response = _request("GET", url, headers=headers or {}, timeout=timeout)
     if response.status_code >= 400:
         details = _truncate_response_body(response.text)
         suffix = f" Response body: {details}" if details else ""
@@ -50,10 +49,7 @@ def get_text(url: str, headers: dict[str, str] | None = None, timeout: int = 20)
 
 
 def get_json(url: str, params: dict[str, str] | None = None, headers: dict[str, str] | None = None, timeout: int = 30) -> dict:
-    try:
-        response = _request("GET", url, params=params or None, headers=headers or {}, timeout=timeout)
-    except Exception as exc:
-        raise RuntimeError(f"Request failed for {url}: {exc}") from exc
+    response = _request("GET", url, params=params or None, headers=headers or {}, timeout=timeout)
     if response.status_code >= 400:
         details = _truncate_response_body(response.text)
         suffix = f" Response body: {details}" if details else ""
@@ -62,10 +58,7 @@ def get_json(url: str, params: dict[str, str] | None = None, headers: dict[str, 
 
 
 def post_json(url: str, payload: dict, headers: dict[str, str] | None = None, timeout: int = 30) -> dict:
-    try:
-        response = _request("POST", url, json=payload, headers=headers or {}, timeout=timeout)
-    except Exception as exc:
-        raise RuntimeError(f"Request failed for {url}: {exc}") from exc
+    response = _request("POST", url, json=payload, headers=headers or {}, timeout=timeout)
     if response.status_code >= 400:
         details = _truncate_response_body(response.text)
         suffix = f" Response body: {details}" if details else ""
